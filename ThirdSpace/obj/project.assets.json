@@ -1,164 +1,14 @@
 {
   "version": 4,
   "targets": {
-    "net10.0": {
-      "Microsoft.AspNetCore.Identity.EntityFrameworkCore/8.0.11": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore.Relational": "8.0.11"
-        },
-        "compile": {
-          "lib/net8.0/Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/net8.0/Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll": {
-            "related": ".xml"
-          }
-        }
-      },
-      "Microsoft.EntityFrameworkCore/8.0.11": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore.Abstractions": "8.0.11",
-          "Microsoft.EntityFrameworkCore.Analyzers": "8.0.11"
-        },
-        "compile": {
-          "lib/net8.0/Microsoft.EntityFrameworkCore.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/net8.0/Microsoft.EntityFrameworkCore.dll": {
-            "related": ".xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net8.0/Microsoft.EntityFrameworkCore.props": {}
-        }
-      },
-      "Microsoft.EntityFrameworkCore.Abstractions/8.0.11": {
-        "type": "package",
-        "compile": {
-          "lib/net8.0/Microsoft.EntityFrameworkCore.Abstractions.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/net8.0/Microsoft.EntityFrameworkCore.Abstractions.dll": {
-            "related": ".xml"
-          }
-        }
-      },
-      "Microsoft.EntityFrameworkCore.Analyzers/8.0.11": {
-        "type": "package",
-        "compile": {
-          "lib/netstandard2.0/_._": {}
-        },
-        "runtime": {
-          "lib/netstandard2.0/_._": {}
-        }
-      },
-      "Microsoft.EntityFrameworkCore.Relational/8.0.11": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore": "8.0.11"
-        },
-        "compile": {
-          "lib/net8.0/Microsoft.EntityFrameworkCore.Relational.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/net8.0/Microsoft.EntityFrameworkCore.Relational.dll": {
-            "related": ".xml"
-          }
-        }
-      }
-    }
+    "net10.0": {}
   },
-  "libraries": {
-    "Microsoft.AspNetCore.Identity.EntityFrameworkCore/8.0.11": {
-      "sha512": "AR87eq0J3pqRPcqJUe9f5xLj8FoXxpakyjSDwvVQXWd6ClzFLQ+GPksCM009tpi6WJZblZ7qud5UZFj421UYTg==",
-      "type": "package",
-      "path": "microsoft.aspnetcore.identity.entityframeworkcore/8.0.11",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/net8.0/Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll",
-        "lib/net8.0/Microsoft.AspNetCore.Identity.EntityFrameworkCore.xml",
-        "microsoft.aspnetcore.identity.entityframeworkcore.8.0.11.nupkg.sha512",
-        "microsoft.aspnetcore.identity.entityframeworkcore.nuspec"
-      ]
-    },
-    "Microsoft.EntityFrameworkCore/8.0.11": {
-      "sha512": "stbjWBTtpQ1HtqXMFyKnXFTr76PvaOHI2b2h85JqBi3eZr00nspvR/a90Zwh8CQ4rVawqLiTG0+0yZQWaav+sQ==",
-      "type": "package",
-      "path": "microsoft.entityframeworkcore/8.0.11",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "PACKAGE.md",
-        "buildTransitive/net8.0/Microsoft.EntityFrameworkCore.props",
-        "lib/net8.0/Microsoft.EntityFrameworkCore.dll",
-        "lib/net8.0/Microsoft.EntityFrameworkCore.xml",
-        "microsoft.entityframeworkcore.8.0.11.nupkg.sha512",
-        "microsoft.entityframeworkcore.nuspec"
-      ]
-    },
-    "Microsoft.EntityFrameworkCore.Abstractions/8.0.11": {
-      "sha512": "++zY0Ea724ku1jptWJmF7jm3I4IXTexfT4qi1ETcSFFF7qj+qm6rRgN7mTuKkwIETuXk0ikfzudryRjUGrrNKQ==",
-      "type": "package",
-      "path": "microsoft.entityframeworkcore.abstractions/8.0.11",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "PACKAGE.md",
-        "lib/net8.0/Microsoft.EntityFrameworkCore.Abstractions.dll",
-        "lib/net8.0/Microsoft.EntityFrameworkCore.Abstractions.xml",
-        "microsoft.entityframeworkcore.abstractions.8.0.11.nupkg.sha512",
-        "microsoft.entityframeworkcore.abstractions.nuspec"
-      ]
-    },
-    "Microsoft.EntityFrameworkCore.Analyzers/8.0.11": {
-      "sha512": "NI/AJQjtC7qgWM8Nr85sRkwlog2AnFer5RKP8xTUH0RuPF3nN0tGXBEeYJOLZWp+/+M/C6O7MMDRhKRE8bZwIA==",
-      "type": "package",
-      "path": "microsoft.entityframeworkcore.analyzers/8.0.11",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "analyzers/dotnet/cs/Microsoft.EntityFrameworkCore.Analyzers.dll",
-        "docs/PACKAGE.md",
-        "lib/netstandard2.0/_._",
-        "microsoft.entityframeworkcore.analyzers.8.0.11.nupkg.sha512",
-        "microsoft.entityframeworkcore.analyzers.nuspec"
-      ]
-    },
-    "Microsoft.EntityFrameworkCore.Relational/8.0.11": {
-      "sha512": "3TuuW3i5I4Ro0yoaHmi2MqEDGObOVuhLaMEnd/heaLB1fcvm4fu4PevmC4BOWnI0vo176AIlV5o4rEQciLoohw==",
-      "type": "package",
-      "path": "microsoft.entityframeworkcore.relational/8.0.11",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "PACKAGE.md",
-        "lib/net8.0/Microsoft.EntityFrameworkCore.Relational.dll",
-        "lib/net8.0/Microsoft.EntityFrameworkCore.Relational.xml",
-        "microsoft.entityframeworkcore.relational.8.0.11.nupkg.sha512",
-        "microsoft.entityframeworkcore.relational.nuspec"
-      ]
-    }
-  },
+  "libraries": {},
   "projectFileDependencyGroups": {
     "net10.0": [
-      "Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 8.0.11"
+      "Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 10.0.12",
+      "Microsoft.EntityFrameworkCore.Design >= 10.0.12",
+      "Microsoft.EntityFrameworkCore.Sqlite >= 10.0.12"
     ]
   },
   "packageFolders": {
@@ -186,8 +36,7 @@
         "net10.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "https://api.nuget.org/v3/index.json": {}
+        "C:\\Users\\User\\.nuget\\packages": {}
       },
       "frameworks": {
         "net10.0": {
@@ -215,7 +64,16 @@
         "dependencies": {
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
             "target": "Package",
-            "version": "[8.0.11, )"
+            "version": "[10.0.12, )"
+          },
+          "Microsoft.EntityFrameworkCore.Design": {
+            "suppressParent": "All",
+            "target": "Package",
+            "version": "[10.0.12, )"
+          },
+          "Microsoft.EntityFrameworkCore.Sqlite": {
+            "target": "Package",
+            "version": "[10.0.12, )"
           }
         },
         "imports": [
@@ -657,10 +515,31 @@
   },
   "logs": [
     {
-      "code": "NU1900",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Error occurred while getting package vulnerability data: The download of 'https://api.nuget.org/v3-vulnerabilities/2026.11.14.05.29.55/vulnerability.base.json' timed out because no data was received for 60000ms."
+      "code": "NU1102",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.AspNetCore.Identity.EntityFrameworkCore with version (>= 10.0.12)\r\n  - Found 2 version(s) in C:\\Users\\User\\.nuget\\packages [ Nearest version: 10.0.0 ]",
+      "libraryId": "Microsoft.AspNetCore.Identity.EntityFrameworkCore",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1102",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.EntityFrameworkCore.Sqlite with version (>= 10.0.12)\r\n  - Found 1 version(s) in C:\\Users\\User\\.nuget\\packages [ Nearest version: 10.0.0 ]",
+      "libraryId": "Microsoft.EntityFrameworkCore.Sqlite",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1101",
+      "level": "Error",
+      "message": "Unable to find package Microsoft.EntityFrameworkCore.Design. No packages exist with this id in source(s): C:\\Users\\User\\.nuget\\packages",
+      "libraryId": "Microsoft.EntityFrameworkCore.Design",
+      "targetGraphs": [
+        "net10.0"
+      ]
     }
   ]
 }
