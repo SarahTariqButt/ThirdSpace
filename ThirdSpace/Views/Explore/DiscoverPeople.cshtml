@@ -1,0 +1,545 @@
+﻿@model IEnumerable<ThirdSpace.Models.User>
+@using ThirdSpace.Models
+@using System.Security.Claims
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Discover People";
+
+    var currentUserId =
+        User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    var requests =
+        ViewBag.FriendRequests as IEnumerable<FriendRequest>
+        ?? Enumerable.Empty<FriendRequest>();
+}
+
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>Discover People - ThirdSpace</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+          rel="stylesheet" />
+</head>
+
+<body class="bg-black text-light">
+
+    <header class="navbar bg-dark border-bottom border-secondary px-4 py-2">
+
+        <a asp-controller="Home"
+           asp-action="Index"
+           class="navbar-brand">
+
+            <img src="~/images/logo.png"
+                 alt="ThirdSpace"
+                 width="150" />
+
+        </a>
+
+        <span class="text-info fw-semibold">
+            <i class="bi bi-compass me-2"></i>
+            Explore
+        </span>
+
+    </header>
+
+    <div class="container-fluid px-0">
+
+        <div class="row g-0">
+
+            <!-- SIDEBAR -->
+            <aside class="col-md-3 col-lg-2 bg-dark border-end border-secondary min-vh-100 p-3">
+
+                <nav class="nav flex-column gap-2">
+
+                    <a asp-controller="Home"
+                       asp-action="Index"
+                       class="nav-link text-light rounded-3 py-3">
+
+                        <i class="bi bi-house-door me-3"></i>
+                        Home
+
+                    </a>
+
+                    <a asp-controller="Explore"
+                       asp-action="Index"
+                       class="nav-link bg-info bg-opacity-25 text-info rounded-3 py-3">
+
+                        <i class="bi bi-compass-fill me-3"></i>
+                        Explore
+
+                    </a>
+
+                    <a asp-controller="Communities"
+                       asp-action="Index"
+                       class="nav-link text-light rounded-3 py-3">
+
+                        <i class="bi bi-people me-3"></i>
+                        Communities
+
+                    </a>
+
+                    <a asp-controller="Marketplace"
+                       asp-action="Index"
+                       class="nav-link text-light rounded-3 py-3">
+
+                        <i class="bi bi-shop me-3"></i>
+                        Marketplace
+
+                    </a>
+
+                </nav>
+
+            </aside>
+
+            <!-- MAIN CONTENT -->
+            <main class="col-md-9 col-lg-10 p-3 p-lg-4">
+
+                <div class="mb-4">
+
+                    <h2 class="fw-bold mb-2">
+                        Discover People
+                    </h2>
+
+                    <p class="text-secondary">
+                        Find new people and build connections
+                        on ThirdSpace.
+                    </p>
+
+                </div>
+
+                <!-- SEARCH USERS -->
+                <div class="mb-4">
+
+                    <div class="input-group">
+
+                        <span class="input-group-text bg-dark border-secondary">
+                            <i class="bi bi-search"></i>
+                        </span>
+
+                        <input type="search"
+                               id="searchPeople"
+                               class="form-control bg-dark border-secondary py-3"
+                               placeholder="Search by username..." />
+
+                        <button type="button"
+                                id="searchButton"
+                                class="btn btn-info px-4">
+
+                            Search
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <!-- EXPLORE TABS -->
+                <ul class="nav nav-pills gap-2 mb-4">
+
+                    <li class="nav-item">
+
+                        <a asp-controller="Explore"
+                           asp-action="Index"
+                           class="nav-link text-light">
+
+                            <i class="bi bi-grid-3x3-gap me-2"></i>
+                            Explore Posts
+
+                        </a>
+
+                    </li>
+
+                    <li class="nav-item">
+
+                        <a asp-controller="Explore"
+                           asp-action="DiscoverPeople"
+                           class="nav-link active bg-info text-dark fw-semibold">
+
+                            <i class="bi bi-people me-2"></i>
+                            Discover People
+
+                        </a>
+
+                    </li>
+
+                    <li class="nav-item">
+
+                        <a asp-controller="Explore"
+                           asp-action="FriendRequests"
+                           class="nav-link text-light">
+
+                            <i class="bi bi-person-check me-2"></i>
+                            Friend Requests
+
+                        </a>
+
+                    </li>
+
+                </ul>
+
+                <!-- SUCCESS / ERROR MESSAGES -->
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger">
+                        @TempData["Error"]
+                    </div>
+                }
+
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success">
+                        @TempData["Success"]
+                    </div>
+                }
+
+                <div id="requestMessage"
+                     class="alert d-none"
+                     role="status"
+                     aria-live="polite">
+                </div>
+
+                <!-- REGISTERED USERS -->
+                <section>
+
+                    <h5 class="fw-semibold mb-3">
+                        People on ThirdSpace
+                    </h5>
+
+                    <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3 g-3"
+                         id="peopleList">
+
+                        @foreach (var person in Model)
+                        {
+                            var existingRequest = requests
+                            .FirstOrDefault(r =>
+                            (r.SenderId == currentUserId &&
+                            r.ReceiverId == person.Id) ||
+                            (r.ReceiverId == currentUserId &&
+                            r.SenderId == person.Id));
+
+                            bool sentByMe =
+                            existingRequest != null &&
+                            existingRequest.SenderId == currentUserId;
+
+                            <div class="col person-card"
+                                 data-username="@(person.UserName ?? "")">
+
+                                <div class="card bg-dark border-secondary rounded-4 h-100">
+
+                                    <div class="card-body p-4 d-flex flex-column">
+
+                                        <div class="d-flex align-items-center gap-3 mb-3">
+
+                                            <i class="bi bi-person-circle fs-1 text-info"></i>
+
+                                            <div class="flex-grow-1">
+
+                                                <h5 class="fw-semibold mb-1 text-break">
+                                                    @(person.UserName ?? "ThirdSpace User")
+                                                </h5>
+
+                                                <span class="text-secondary small">
+                                                    ThirdSpace Member
+                                                </span>
+
+                                            </div>
+
+                                        </div>
+
+                                        @if (!string.IsNullOrWhiteSpace(person.Bio))
+                                        {
+                                            <p class="text-secondary small mb-3">
+                                                @person.Bio
+                                            </p>
+                                        }
+
+                                        <div class="mt-auto">
+
+                                            @if (existingRequest == null)
+                                            {
+                                                <!-- AJAX ADD FRIEND FORM -->
+                                                <form class="sendRequestForm"
+                                                      asp-controller="Explore"
+                                                      asp-action="SendRequest"
+                                                      method="post">
+
+                                                    @Html.AntiForgeryToken()
+
+                                                    <input type="hidden"
+                                                           name="receiverId"
+                                                           value="@person.Id" />
+
+                                                    <button type="submit"
+                                                            class="btn btn-info w-100 fw-semibold requestButton">
+
+                                                        <i class="bi bi-person-plus me-1"></i>
+                                                        Add Friend
+
+                                                    </button>
+
+                                                </form>
+                                            }
+                                            else if (existingRequest.Status == "Pending")
+                                            {
+                                                if (sentByMe)
+                                                {
+                                                    <button type="button"
+                                                            class="btn btn-outline-secondary w-100"
+                                                            disabled>
+
+                                                        <i class="bi bi-clock me-1"></i>
+                                                        Request Sent
+
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <a asp-controller="Explore"
+                                                       asp-action="FriendRequests"
+                                                       class="btn btn-outline-info w-100">
+
+                                                        <i class="bi bi-envelope me-1"></i>
+                                                        Respond to Request
+
+                                                    </a>
+                                                }
+                                            }
+                                            else if (existingRequest.Status == "Accepted")
+                                            {
+                                                <button type="button"
+                                                        class="btn btn-outline-success w-100"
+                                                        disabled>
+
+                                                    <i class="bi bi-check-circle me-1"></i>
+                                                    Friends
+
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button"
+                                                        class="btn btn-outline-secondary w-100"
+                                                        disabled>
+
+                                                    Request @existingRequest.Status
+
+                                                </button>
+                                            }
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        }
+
+                    </div>
+
+                    @if (!Model.Any())
+                    {
+                        <div class="card bg-dark border-secondary rounded-4">
+
+                            <div class="card-body text-center py-5">
+
+                                <i class="bi bi-people display-4 text-secondary"></i>
+
+                                <h5 class="fw-semibold mt-3">
+                                    No people to discover yet
+                                </h5>
+
+                                <p class="text-secondary mb-0">
+                                    Other registered ThirdSpace users will appear here.
+                                </p>
+
+                            </div>
+
+                        </div>
+                    }
+
+                    <div id="noSearchResults"
+                         class="card bg-dark border-secondary rounded-4 d-none">
+
+                        <div class="card-body text-center py-5">
+
+                            <i class="bi bi-search display-4 text-secondary"></i>
+
+                            <h5 class="fw-semibold mt-3">
+                                No matching people found
+                            </h5>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        </div>
+
+    </div>
+
+    <!-- BOOTSTRAP -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JQUERY -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            // SEARCH USERS WITHOUT REFRESHING
+            function searchUsers() {
+
+                const searchText = String(
+                    $("#searchPeople").val() || ""
+                ).toLowerCase().trim();
+
+                let visibleCount = 0;
+
+                $(".person-card").each(function () {
+
+                    const username = String(
+                        $(this).attr("data-username") || ""
+                    ).toLowerCase();
+
+                    const matches = username.includes(searchText);
+
+                    $(this).toggleClass("d-none", !matches);
+
+                    if (matches) {
+                        visibleCount++;
+                    }
+                });
+
+                $("#noSearchResults").toggleClass(
+                    "d-none",
+                    visibleCount > 0 ||
+                    $(".person-card").length === 0
+                );
+            }
+
+            $("#searchPeople").on("input", searchUsers);
+
+            $("#searchButton").on("click", searchUsers);
+
+
+            // AJAX: SEND FRIEND REQUEST
+            $(".sendRequestForm").on("submit", function (event) {
+
+                event.preventDefault();
+
+                const form = $(this);
+                const button = form.find(".requestButton");
+                const messageBox = $("#requestMessage");
+
+                button.prop("disabled", true);
+                button.text("Sending...");
+
+                messageBox
+                    .addClass("d-none")
+                    .removeClass("alert-success alert-danger")
+                    .text("");
+
+                $.ajax({
+
+                    url: form.attr("action"),
+
+                    type: "POST",
+
+                    data: form.serialize(),
+
+                    dataType: "json",
+
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+
+                    success: function (response) {
+
+                        if (response.success) {
+
+                            button
+                                .removeClass("btn-info fw-semibold")
+                                .addClass("btn-outline-secondary")
+                                .html(
+                                    '<i class="bi bi-clock me-1"></i>Request Sent'
+                                );
+
+                            messageBox
+                                .removeClass("d-none")
+                                .addClass("alert-success")
+                                .text(
+                                    response.message ||
+                                    "Friend request sent."
+                                );
+
+                        } else {
+
+                            button.prop("disabled", false);
+
+                            button
+                                .html(
+                                    '<i class="bi bi-person-plus me-1"></i>Add Friend'
+                                );
+
+                            messageBox
+                                .removeClass("d-none")
+                                .addClass("alert-danger")
+                                .text(
+                                    response.message ||
+                                    "Unable to send friend request."
+                                );
+                        }
+                    },
+
+                    error: function (xhr) {
+
+                        const errorMessage =
+                            xhr.responseJSON?.message ||
+                            "Unable to send friend request.";
+
+                        messageBox
+                            .removeClass("d-none")
+                            .addClass("alert-danger")
+                            .text(errorMessage);
+
+                        // If a request already exists,
+                        // leave the button disabled.
+                        if (xhr.status === 409) {
+
+                            button
+                                .removeClass("btn-info fw-semibold")
+                                .addClass("btn-outline-secondary")
+                                .text("Request Already Exists");
+
+                        } else {
+
+                            button
+                                .prop("disabled", false)
+                                .html(
+                                    '<i class="bi bi-person-plus me-1"></i>Add Friend'
+                                );
+                        }
+                    }
+                });
+
+            });
+
+        });
+    </script>
+
+</body>
+</html>

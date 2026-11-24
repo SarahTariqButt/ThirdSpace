@@ -1,0 +1,80 @@
+﻿@model IEnumerable<ThirdSpace.Models.Communities.Post>
+
+@{
+    Layout = "_CommunitiesLayout";
+    ViewData["Title"] = "My Posts";
+    ViewData["CurrentCommunityPage"] = "MyPosts";
+}
+
+<div class="ts-page-title">
+
+    <div>
+        <div class="ts-eyebrow">
+            <i class="bi bi-person-check me-1"></i>
+            AUTHOR MANAGEMENT
+        </div>
+
+        <h1>My Posts</h1>
+
+        <p>
+            All discussions you've created
+            across your communities.
+        </p>
+    </div>
+
+</div>
+
+<div class="ts-my-posts-toolbar">
+
+    <span>
+        <i class="bi bi-file-earmark-text me-2"></i>
+        My Community Posts
+    </span>
+
+    <a asp-controller="Communities"
+       asp-action="CreatePost"
+       class="btn btn-info ts-create-btn">
+
+        <i class="bi bi-plus-lg me-1"></i>
+        New Post
+
+    </a>
+
+</div>
+
+@if (Model.Any())
+{
+    <div class="ts-post-list">
+
+        @foreach (var post in Model
+            .OrderByDescending(p => p.CreatedAt))
+        {
+            <partial name="_CommunityPostCard"
+                     model="post" />
+        }
+
+    </div>
+}
+else
+{
+    <section class="ts-empty">
+
+        <i class="bi bi-file-earmark-text"></i>
+
+        <h2>You haven't created any posts yet</h2>
+
+        <p>
+            Your posts from different communities
+            will appear here.
+        </p>
+
+        <a asp-controller="Communities"
+           asp-action="CreatePost"
+           class="btn btn-info ts-create-btn">
+
+            Create a Post
+
+        </a>
+
+    </section>
+}

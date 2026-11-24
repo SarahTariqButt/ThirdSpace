@@ -1,0 +1,70 @@
+﻿@model IEnumerable<ThirdSpace.Models.Communities.Post>
+
+@{
+    Layout = "_CommunitiesLayout";
+    ViewData["Title"] = "Communities";
+    ViewData["CurrentCommunityPage"] = "Index";
+}
+
+<div class="container-fluid px-3 px-lg-4 py-4 text-light">
+
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+
+        <div>
+            <div class="text-info text-uppercase small fw-semibold mb-2">
+                <i class="bi bi-stars me-2"></i>
+                Your Community Space
+            </div>
+
+            <h1 class="h2 fw-bold mb-2">
+                Your Feed
+            </h1>
+
+            <p class="text-secondary mb-0">
+                Discussions from the communities you've joined.
+            </p>
+        </div>
+
+        <div class="d-flex align-items-center text-secondary small mt-2">
+            <i class="bi bi-clock me-2"></i>
+            Newest
+        </div>
+
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="d-flex flex-column gap-3">
+
+            @foreach (var post in Model.OrderByDescending(p => p.CreatedAt))
+            {
+                <partial name="_CommunityPostCard" model="post" />
+            }
+
+        </div>
+    }
+    else
+    {
+        <div class="card bg-dark text-light border-secondary rounded-4 shadow-sm">
+
+            <div class="card-body text-center px-4 py-5">
+
+                <div class="mb-3">
+                    <i class="bi bi-chat-square-text text-info fs-1"></i>
+                </div>
+
+                <h2 class="h4 fw-semibold mb-3">
+                    No discussions yet
+                </h2>
+
+                <p class="text-secondary mb-0">
+                    Join a community from Popular Communities
+                    to start seeing posts in your feed.
+                </p>
+
+            </div>
+
+        </div>
+    }
+
+</div>

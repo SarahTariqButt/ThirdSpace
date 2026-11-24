@@ -1,114 +1,51 @@
 
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ThirdSpace.Data;
+using Microsoft.AspNetCore.Authorization;
 using ThirdSpace.Models;
+using ThirdSpace.Interfaces;
 
 namespace ThirdSpace.Controllers
 {
     [Authorize]
     public class HomeController : Controller
     {
-        private readonly ApplicationDbContext _context;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IWebHostEnvironment _environment;
+        private readonly ILogger<HomeController> _logger;
+        private readonly IHomePostRepository _homePostRepository;
 
         public HomeController(
-            ApplicationDbContext context,
-            UserManager<ApplicationUser> userManager,
-            IWebHostEnvironment environment)
+            ILogger<HomeController> logger,
+            IHomePostRepository homePostRepository)
         {
-            _context = context;
-            _userManager = userManager;
-            _environment = environment;
+            _logger = logger;
+            _homePostRepository = homePostRepository;
         }
 
         public async Task<IActionResult> Index()
         {
-            var posts = await _context.Posts
-                .Include(p => p.User)
-                .OrderByDescending(p => p.CreatedAt)
-                .ToListAsync();
+            var posts = await _homePostRepository.GetAllAsync();
 
-            return View(posts);
+            ViewBag.HomePosts = posts;
+
+            return View();
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreatePost(
-            string content,
-            IFormFile? image)
+        public IActionResult Privacy()
         {
-            if (string.IsNullOrWhiteSpace(content))
+            return View();
+        }
+
+        [ResponseCache(
+            Duration = 0,
+            Location = ResponseCacheLocation.None,
+            NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel
             {
-                TempData["Error"] = "Post content is required.";
-                return RedirectToAction("Index");
-            }
-
-            if (content.Length > 2000)
-            {
-                TempData["Error"] = "Post cannot exceed 2000 characters.";
-                return RedirectToAction("Index");
-            }
-
-            string? imagePath = null;
-
-            if (image != null && image.Length > 0)
-            {
-                const long maxImageSize = 5 * 1024 * 1024;
-
-                if (image.Length > maxImageSize)
-                {
-                    TempData["Error"] = "Image must be smaller than 5 MB.";
-                    return RedirectToAction("Index");
-                }
-
-                var extension = Path.GetExtension(image.FileName)
-                    .ToLowerInvariant();
-
-                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
-
-                if (!allowedExtensions.Contains(extension))
-                {
-                    TempData["Error"] = "Only JPG and PNG images are allowed.";
-                    return RedirectToAction("Index");
-                }
-
-                var uploadsFolder = Path.Combine(
-                    _environment.WebRootPath, "uploads");
-
-                Directory.CreateDirectory(uploadsFolder);
-
-                var fileName = Guid.NewGuid().ToString("N") + extension;
-                var filePath = Path.Combine(uploadsFolder, fileName);
-
-                await using (var stream = System.IO.File.Create(filePath))
-                {
-                    await image.CopyToAsync(stream);
-                }
-
-                imagePath = "/uploads/" + fileName;
-            }
-
-            var userId = _userManager.GetUserId(User);
-
-            if (userId == null)
-                return Challenge();
-
-            var post = new Post
-            {
-                Content = content.Trim(),
-                ImagePath = imagePath,
-                UserId = userId,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Posts.Add(post);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("Index");
+                RequestId = Activity.Current?.Id
+                    ?? HttpContext.TraceIdentifier
+            });
         }
     }
 }

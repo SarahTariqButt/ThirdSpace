@@ -1,0 +1,50 @@
+﻿@model ThirdSpace.Models.Communities.Post
+
+<article class="card bg-dark text-light border-secondary rounded-4 mb-3">
+
+    <div class="card-body p-4">
+
+        <!-- Community, Author and Date -->
+        <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+
+            <i class="bi bi-person-circle fs-4 text-info"></i>
+
+            <a asp-controller="Communities"
+               asp-action="Details"
+               asp-route-id="@Model.CommunityId"
+               class="text-info fw-semibold text-decoration-none">
+
+                t/@(Model.Community?.Name ?? "Community")
+            </a>
+
+            <span class="text-secondary">·</span>
+
+            <span class="text-secondary small">
+                Posted by @(Model.User?.UserName ?? "Community Member")
+            </span>
+
+            <span class="text-secondary">·</span>
+
+            <span class="text-secondary small">
+                <i class="bi bi-clock me-1"></i>
+                @Model.CreatedAt.ToLocalTime().ToString("g")
+            </span>
+
+        </div>
+
+        <!-- Post Title -->
+        <h3 class="h5 fw-bold mb-3">
+            @Model.Title
+        </h3>
+
+        <!-- Post Body -->
+        @if (!string.IsNullOrWhiteSpace(Model.Body))
+        {
+            <p class="text-secondary mb-0">
+                @Model.Body.Trim()
+            </p>
+        }
+
+    </div>
+
+</article>

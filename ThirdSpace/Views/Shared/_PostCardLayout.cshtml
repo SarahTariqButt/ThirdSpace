@@ -1,0 +1,155 @@
+@model ThirdSpace.Models.Marketplace.Listing
+
+@{
+    var currentUserId = User.FindFirst(
+        System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+    var isMine = Model.SellerId == currentUserId;
+}
+
+<div class="card bg-dark border-secondary rounded-4 h-100 overflow-hidden">
+
+    <button type="button"
+            class="btn p-0 border-0 text-start"
+            data-bs-toggle="modal"
+            data-bs-target="#listing-@Model.Id"
+            aria-label="View details for @Model.Title">
+
+        @if (!string.IsNullOrWhiteSpace(Model.ImagePath))
+        {
+            <img src="@Url.Content(Model.ImagePath)"
+                 alt="@Model.Title"
+                 class="card-img-top w-100 object-fit-cover"
+                 height="190" />
+        }
+        else
+        {
+            <div class="ratio ratio-4x3 bg-body-tertiary text-secondary">
+                <div class="d-flex align-items-center justify-content-center">
+                    <i class="bi bi-image fs-1"></i>
+                </div>
+            </div>
+        }
+
+        <div class="card-body">
+
+            <h5 class="text-info mb-1">
+                Rs. @Model.Price.ToString("N0")
+            </h5>
+
+            <div class="fw-semibold text-light">
+                @Model.Title
+            </div>
+
+            <small class="text-secondary">
+                @Model.Location · @Model.Condition
+            </small>
+
+        </div>
+
+    </button>
+
+    <div class="card-footer bg-transparent border-secondary p-3 mt-auto">
+
+        @if (isMine)
+        {
+            <span class="small text-secondary">
+                <i class="bi bi-person-check me-1"></i>
+                Your listing
+            </span>
+        }
+        else
+        {
+            <a asp-controller="Marketplace"
+               asp-action="Chats"
+               asp-route-listingId="@Model.Id"
+               class="btn btn-info btn-sm w-100">
+
+                <i class="bi bi-chat-dots me-1"></i>
+                Chat with Seller
+
+            </a>
+        }
+
+    </div>
+
+</div>
+
+<div class="modal fade"
+     id="listing-@Model.Id"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+
+        <div class="modal-content bg-dark text-light border-secondary">
+
+            <div class="modal-header border-secondary">
+
+                <h5 class="modal-title">
+                    @Model.Title
+                </h5>
+
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                @if (!string.IsNullOrWhiteSpace(Model.ImagePath))
+                {
+                    <img src="@Url.Content(Model.ImagePath)"
+                         alt="@Model.Title"
+                         class="img-fluid rounded-3 mb-3" />
+                }
+
+                <h4 class="text-info">
+                    Rs. @Model.Price.ToString("N0")
+                </h4>
+
+                <p class="text-secondary">
+                    @Model.Category · @Model.Condition · @Model.Location
+                </p>
+
+                <p class="text-break">
+                    @Model.Description
+                </p>
+
+                <p class="mb-0">
+                    <i class="bi bi-person-circle me-2"></i>
+                    Seller: @(Model.Seller?.UserName ?? "Unknown Seller")
+                </p>
+
+            </div>
+
+            <div class="modal-footer border-secondary">
+
+                <button type="button"
+                        class="btn btn-outline-light"
+                        data-bs-dismiss="modal">
+                    Close
+                </button>
+
+                @if (!isMine)
+                {
+                    <a asp-controller="Marketplace"
+                       asp-action="Chats"
+                       asp-route-listingId="@Model.Id"
+                       class="btn btn-info">
+
+                        Chat with Seller
+
+                    </a>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

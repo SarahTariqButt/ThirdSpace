@@ -3,18 +3,17 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ThirdSpace.Models;
-using ThirdSpace.ViewModels;
 
 namespace ThirdSpace.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
 
         public AccountController(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+            UserManager<User> userManager,
+            SignInManager<User> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -30,39 +29,67 @@ namespace ThirdSpace.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model)
+        public async Task<IActionResult> Register(
+            string username,
+            string email,
+            string password,
+            string confirmPassword)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var existingUser = await _userManager.FindByEmailAsync(model.Email);
-
-            if (existingUser != null)
+            if (string.IsNullOrWhiteSpace(username) ||
+                string.IsNullOrWhiteSpace(email) ||
+                string.IsNullOrWhiteSpace(password) ||
+                string.IsNullOrWhiteSpace(confirmPassword))
             {
-                ModelState.AddModelError("Email", "Email is already registered.");
-                return View(model);
+                ModelState.AddModelError(
+                    string.Empty,
+                    "All fields are required.");
+
+                return View();
             }
 
-            var user = new ApplicationUser
+            if (password != confirmPassword)
             {
-                UserName = model.Username,
-                Email = model.Email
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Passwords do not match.");
+
+                return View();
+            }
+
+            var user = new User
+            {
+                UserName = username.Trim(),
+                Email = email.Trim()
             };
 
-            var result = await _userManager.CreateAsync(user, model.Password);
+            var result = await _userManager.CreateAsync(
+                user, password);
 
             if (result.Succeeded)
             {
-                await _signInManager.SignInAsync(user, isPersistent: false);
+                if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                {
+                    TempData["Success"] =
+                        "Account created. Please confirm your email before logging in.";
+
+                    return RedirectToAction("Login");
+                }
+
+                await _signInManager.SignInAsync(
+                    user,
+                    isPersistent: false);
+
                 return RedirectToAction("Index", "Home");
             }
 
             foreach (var error in result.Errors)
             {
-                ModelState.AddModelError("", error.Description);
+                ModelState.AddModelError(
+                    string.Empty,
+                    error.Description);
             }
 
-            return View(model);
+            return View();
         }
 
         [HttpGet]
@@ -77,36 +104,80 @@ namespace ThirdSpace.Controllers
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(
-            LoginViewModel model,
+            string email,
+            string password,
             string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
 
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var user = await _userManager.FindByEmailAsync(model.Email);
-
-            if (user != null)
+            if (string.IsNullOrWhiteSpace(email) ||
+                string.IsNullOrWhiteSpace(password))
             {
-                var result = await _signInManager.PasswordSignInAsync(
-                    user,
-                    model.Password,
-                    model.RememberMe,
-                    lockoutOnFailure: false
-                );
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Email and password are required.");
 
-                if (result.Succeeded)
-                {
-                    if (Url.IsLocalUrl(returnUrl))
-                        return LocalRedirect(returnUrl);
-
-                    return RedirectToAction("Index", "Home");
-                }
+                return View();
             }
 
-            ModelState.AddModelError("", "Invalid email or password.");
-            return View(model);
+            var user = await _userManager.FindByEmailAsync(
+                email.Trim());
+
+
+
+
+            if (user == null)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Invalid email or password.");
+
+                return View();
+            }
+
+            var result = await _signInManager.PasswordSignInAsync(
+                user,
+                password,
+                isPersistent: false,
+                lockoutOnFailure: true);
+
+
+            if (result.Succeeded)
+            {
+                if (Url.IsLocalUrl(returnUrl))
+                {
+                    return LocalRedirect(returnUrl);
+                }
+
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (result.IsLockedOut)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Your account is temporarily locked. Please try again later.");
+            }
+            else if (result.RequiresTwoFactor)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Two-factor authentication is required.");
+            }
+            else if (result.IsNotAllowed)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Sign-in is not allowed. Please check your account confirmation status.");
+            }
+            else
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Invalid email or password.");
+            }
+
+            return View();
         }
 
         [HttpPost]
@@ -115,6 +186,7 @@ namespace ThirdSpace.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
+
             return RedirectToAction("Login", "Account");
         }
     }

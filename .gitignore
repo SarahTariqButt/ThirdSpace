@@ -1,20 +1,6 @@
-# Visual Studio / .NET build artifacts
+
 **/bin/
 **/obj/
-.vs/
-
-# Local SQLite databases (may contain registered users)
-*.db
-*.db-shm
-*.db-wal
-*.sqlite
-*.sqlite3
-
-# Local settings and secrets
-appsettings.Development.json
-*.user
-*.suo
-
-# OS/editor files
-.DS_Store
-Thumbs.db
+**/.vs/
+**/*.csproj.user
+**/Properties/serviceDependencies.local.json

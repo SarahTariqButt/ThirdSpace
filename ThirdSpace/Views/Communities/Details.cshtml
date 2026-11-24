@@ -1,0 +1,313 @@
+﻿@model ThirdSpace.Models.Communities.Community
+
+@{
+    Layout = "_CommunitiesLayout";
+    ViewData["Title"] = Model.Name;
+    ViewData["CurrentCommunityPage"] = "Details";
+
+    bool isMember = ViewBag.IsMember is bool member && member;
+
+    var posts = Model.Posts
+        .OrderByDescending(p => p.CreatedAt)
+        .ToList();
+}
+
+<div class="mb-4">
+
+    <a asp-controller="Communities"
+       asp-action="Index"
+       class="text-decoration-none text-secondary small d-inline-flex align-items-center gap-2 mb-4">
+
+        <i class="bi bi-arrow-left"></i>
+        Back to Your Feed
+    </a>
+
+    <div class="card bg-dark border-secondary rounded-4">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+
+                <div class="flex-grow-1">
+
+                    <div class="small text-info fw-semibold mb-2">
+                        <i class="bi bi-people me-1"></i>
+                        THIRDSPACE COMMUNITY
+                    </div>
+
+                    <h1 class="h3 fw-bold mb-3 text-light">
+                        t/@Model.Name
+                    </h1>
+
+                    <div class="d-flex align-items-center flex-wrap gap-3 text-secondary small">
+
+                        <span>
+                            <i class="bi bi-people me-1"></i>
+
+                            <span id="memberCount">@Model.Members.Count</span>
+
+                            <span id="memberLabel">
+                                @(Model.Members.Count == 1 ? "member" : "members")
+                            </span>
+                        </span>
+
+                        <span>
+                            <i class="bi bi-calendar3 me-1"></i>
+                            Created @Model.CreatedAt.ToString("dd MMM yyyy")
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="d-flex align-items-center">
+
+                    <form id="membershipForm"
+                          asp-controller="Communities"
+                          asp-action="@(isMember ? "Leave" : "Join")"
+                          asp-route-id="@Model.Id"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <button id="membershipButton"
+                                type="submit"
+                                class="btn btn-sm rounded-3 px-3 @(isMember ? "btn-outline-danger" : "btn-info fw-semibold")">
+
+                            @if (isMember)
+                            {
+                                <i class="bi bi-box-arrow-right me-1"></i>
+                                <span>Leave</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-plus-lg me-1"></i>
+                                <span>Join Community</span>
+                            }
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+            <div id="membershipMessage"
+                 class="small mt-3 d-none"
+                 role="status"
+                 aria-live="polite">
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+
+    <div>
+        <h2 class="h5 fw-bold mb-1">
+            Community Posts
+        </h2>
+
+        <p class="text-secondary small mb-0">
+            Discussions shared by community members.
+        </p>
+    </div>
+
+    <span class="text-secondary small">
+        <i class="bi bi-clock me-1"></i>
+        Newest
+    </span>
+
+</div>
+
+@if (posts.Any())
+{
+    <div class="d-flex flex-column gap-3">
+
+        @foreach (var post in posts)
+        {
+            <div class="card bg-dark text-light border-secondary rounded-4">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-2 mb-3">
+
+                        <i class="bi bi-person-circle fs-4 text-info"></i>
+
+                        <div>
+                            <div class="fw-semibold small">
+                                @(post.User?.UserName ?? "Community Member")
+                            </div>
+
+                            <div class="text-secondary small">
+                                @post.CreatedAt.ToString("dd MMM yyyy, hh:mm tt")
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <h3 class="h6 fw-bold mb-2">
+                        @post.Title
+                    </h3>
+
+                    @if (!string.IsNullOrWhiteSpace(post.Body))
+                    {
+                        <p class="text-secondary mb-0"
+                           style="white-space: pre-wrap; overflow-wrap: anywhere;">@post.Body</p>
+                    }
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+}
+else
+{
+    <div class="card bg-dark border-secondary rounded-4">
+
+        <div class="card-body text-center px-4 py-5">
+
+            <i class="bi bi-chat-square-text fs-1 text-info"></i>
+
+            <h3 class="h5 fw-semibold mt-3 mb-2">
+                No posts yet
+            </h3>
+
+            <p class="text-secondary small mb-3">
+                Be the first to start a discussion in this community.
+            </p>
+
+            <a id="createPostLink"
+               asp-controller="Communities"
+               asp-action="CreatePost"
+               class="btn btn-info btn-sm fw-semibold px-3 @(isMember ? "" : "d-none")">
+
+                <i class="bi bi-plus-lg me-1"></i>
+                Create Post
+            </a>
+
+            <p id="joinToParticipate"
+               class="text-secondary small mb-0 @(isMember ? "d-none" : "")">
+                Join this community to participate.
+            </p>
+
+        </div>
+
+    </div>
+}
+
+<!-- jQuery AJAX -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+
+        const joinUrl = '@Url.Action("Join", "Communities", new { id = Model.Id })';
+        const leaveUrl = '@Url.Action("Leave", "Communities", new { id = Model.Id })';
+
+        $("#membershipForm").on("submit", function (event) {
+
+            event.preventDefault();
+
+            const form = $(this);
+            const button = $("#membershipButton");
+            const message = $("#membershipMessage");
+
+            button.prop("disabled", true);
+
+            message
+                .addClass("d-none")
+                .removeClass("text-success text-danger")
+                .text("");
+
+            $.ajax({
+                url: form.attr("action"),
+                type: "POST",
+                data: form.serialize(),
+                dataType: "json",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+
+                success: function (response) {
+
+                    if (!response.success) {
+                        message
+                            .removeClass("d-none")
+                            .addClass("text-danger")
+                            .text(response.message || "Something went wrong.");
+
+                        return;
+                    }
+
+                    const count = response.memberCount;
+
+                    $("#memberCount").text(count);
+                    $("#memberLabel").text(
+                        count === 1 ? "member" : "members"
+                    );
+
+                    if (response.isMember) {
+
+                        button
+                            .removeClass("btn-info fw-semibold")
+                            .addClass("btn-outline-danger");
+
+                        button.html(
+                            '<i class="bi bi-box-arrow-right me-1"></i>Leave'
+                        );
+
+                        form.attr("action", leaveUrl);
+
+                        $("#createPostLink").removeClass("d-none");
+                        $("#joinToParticipate").addClass("d-none");
+
+                    } else {
+
+                        button
+                            .removeClass("btn-outline-danger")
+                            .addClass("btn-info fw-semibold");
+
+                        button.html(
+                            '<i class="bi bi-plus-lg me-1"></i>Join Community'
+                        );
+
+                        form.attr("action", joinUrl);
+
+                        $("#createPostLink").addClass("d-none");
+                        $("#joinToParticipate").removeClass("d-none");
+                    }
+
+                    message
+                        .removeClass("d-none")
+                        .addClass("text-success")
+                        .text(response.message);
+                },
+
+                error: function (xhr) {
+
+                    const errorMessage =
+                        xhr.responseJSON?.message ||
+                        "Unable to update membership. Please try again.";
+
+                    message
+                        .removeClass("d-none")
+                        .addClass("text-danger")
+                        .text(errorMessage);
+                },
+
+                complete: function () {
+                    button.prop("disabled", false);
+                }
+            });
+
+        });
+
+    });
+</script>
